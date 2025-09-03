@@ -17,7 +17,7 @@ export default function Bottom() {
   function handleSend(e: React.FormEvent | React.KeyboardEvent) {
     e.preventDefault();
 
-    if (!isConnected) return;
+    if (!isConnected || !currentUser) return;
 
     const newMessage: MessageState = {
       message_id: uuidv4(),
