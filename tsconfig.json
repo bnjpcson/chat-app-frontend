@@ -1,17 +1,16 @@
 {
-  "files": [],
-  "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.node.json"
-    }
-  ],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
+    "esModuleInterop": true,
+    "strict": true, // Optional: To enable strict type checking
+    "skipLibCheck": true, // Optional: To skip type checking of declaration files for performance
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx", // or "react" depending on your version
+    "module": "esnext", // or "node16", "es2020"
+    "target": "esnext", // or "es2020" depending on your requirements
+    "types": ["vite/client"]
   }
 }

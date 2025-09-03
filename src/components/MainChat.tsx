@@ -32,8 +32,8 @@ export default function MainChat() {
 
   const DisplayFromMesage = React.memo(
     ({ message }: { message: MessageState }) => {
+      if (currentUser == null) return;
       const isUser = message.user_id == currentUser.user_id;
-
       return (
         <div
           className={`flex flex-row gap-1 w-full items-end ${
