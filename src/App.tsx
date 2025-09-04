@@ -10,6 +10,7 @@ import { Input } from "./components/ui/input";
 import { Button } from "./components/ui/button";
 import { v4 as uuidv4 } from "uuid";
 import useWebSocket from "./hooks/useWebSocket";
+import { Toaster } from "./components/ui/sonner";
 
 export default function App() {
   const { messages, setMessages } = useStoreMessage();
@@ -69,7 +70,9 @@ export default function App() {
                   {errors}
                 </span>
               )}
-              <Button type="submit">Submit</Button>
+              <Button type="submit" className="cursor-pointer">
+                Submit
+              </Button>
             </form>
           </CardContent>
         </Card>
@@ -78,14 +81,17 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-row items-center justify-center h-screen w-full">
-      <div className="h-full w-full min-w-[320px]">
-        <div className="h-full w-full flex flex-col">
-          <TopBar />
-          <MainChat />
-          <Bottom />
+    <>
+      <Toaster richColors position="top-center" />
+      <div className="flex flex-row items-center justify-center h-screen w-full">
+        <div className="h-full w-full min-w-[320px]">
+          <div className="h-full w-full flex flex-col">
+            <TopBar />
+            <MainChat />
+            <Bottom />
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

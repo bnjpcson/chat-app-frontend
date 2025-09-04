@@ -5,6 +5,7 @@ import { MessageState } from "@/stores/message";
 import { v4 as uuidv4 } from "uuid";
 import useStoreUser from "@/stores/user";
 import useWebSocket from "@/hooks/useWebSocket";
+import { toast } from "sonner";
 
 export default function Bottom() {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -12,12 +13,19 @@ export default function Bottom() {
   const { currentUser } = useStoreUser();
   const [message, setMessage] = useState<string>("");
 
-  const { isConnected, sendMessage } = useWebSocket();
+  const { status, sendMessage } = useWebSocket();
 
   function handleSend(e: React.FormEvent | React.KeyboardEvent) {
     e.preventDefault();
 
-    if (!isConnected || !currentUser) return;
+    if (status != "connected" || !currentUser) {
+      toast.error(
+        "Unable to connect to the server. Please check your network connection or try again later."
+      );
+      return;
+    }
+
+    if (message == "") return;
 
     const newMessage: MessageState = {
       message_id: uuidv4(),

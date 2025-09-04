@@ -2,45 +2,62 @@
 
 import { MessageState } from "@/stores/message";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { toast } from "sonner";
 
 // Custom Hook to handle WebSocket connection
 const useWebSocket = () => {
   const [message, setMessage] = useState<MessageState | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const socketRef = useRef<WebSocket | null>(null);
+  const [status, setStatus] = useState<
+    "connecting" | "disconnected" | "connected"
+  >("connecting");
 
+  const socketRef = useRef<WebSocket | null>(null);
   const VITE_API_WEBSOCKET_URL = import.meta.env.VITE_API_WEBSOCKET_URL;
 
-  // Initialize WebSocket connection
-  useEffect(() => {
-    socketRef.current = new WebSocket(VITE_API_WEBSOCKET_URL);
+  const setupWebSocket = useCallback(() => {
+    if (socketRef.current) {
+      if (status == "connected") {
+        socketRef.current.close();
+      }
+    }
 
-    socketRef.current.onopen = () => {
+    setStatus("connecting");
+    const socket = new WebSocket(VITE_API_WEBSOCKET_URL);
+    socketRef.current = socket;
+
+    socket.onopen = () => {
       console.log("WebSocket connected");
-      setIsConnected(true);
+      setStatus("connected");
     };
 
-    socketRef.current.onmessage = (event: MessageEvent) => {
+    socket.onmessage = (event: MessageEvent) => {
       const newMessage: MessageState = JSON.parse(event.data);
       setMessage(newMessage);
     };
 
-    socketRef.current.onerror = (error: Event) => {
+    socket.onerror = (error: Event) => {
       console.error("WebSocket error:", error);
+      toast.error("Failed to establish a connection. Please try again.");
     };
 
-    socketRef.current.onclose = () => {
+    socket.onclose = () => {
       console.log("WebSocket disconnected");
-      setIsConnected(false);
+      setStatus("disconnected");
     };
+  }, [VITE_API_WEBSOCKET_URL]);
 
-    // Cleanup WebSocket connection when component unmounts
+  // Initial connection on mount
+  useEffect(() => {
+    setupWebSocket();
+
     return () => {
-      if (isConnected) {
-        socketRef.current?.close();
+      if (socketRef.current) {
+        if (status == "connected") {
+          socketRef.current.close();
+        }
       }
     };
-  }, []);
+  }, [setupWebSocket]);
 
   // Send a message through WebSocket
   const sendMessage = useCallback((message: string) => {
@@ -51,7 +68,13 @@ const useWebSocket = () => {
     }
   }, []);
 
-  return { message, isConnected, sendMessage };
+  // Reconnect function to expose
+  const reconnect = useCallback(() => {
+    console.log("Reconnecting WebSocket...");
+    setupWebSocket();
+  }, [setupWebSocket]);
+
+  return { message, status, sendMessage, reconnect };
 };
 
 export default useWebSocket;
